@@ -91,10 +91,31 @@ protected:
 
 	}
 
+	virtual void makePairs( vector<FemtoTrackProxy> &col, string prefix ){
+		TLorentzVector lv1, lv2, lv;
+
+		for ( size_t i = 0; i < col.size(); i++ ){
+			for ( size_t j = i; j < col.size(); j++ ){
+				if ( i == j ) continue;
+				FemtoTrackProxy _p1 = col[i];
+				FemtoTrackProxy _p2 = col[j];
+
+				lv1.SetPtEtaPhiM( _p1._track->mPt, _p1._track->mEta, _p1._track->mPhi, 0.105 );
+				lv2.SetPtEtaPhiM( _p2._track->mPt, _p2._track->mEta, _p2._track->mPhi, 0.105 );
+				lv = lv1 + lv2;
+
+				book->fill( prefix + "_pt_mass", lv.M(), lv.Pt() );
+			} // j	
+		}// i
+	}
+
+
 	virtual void makePairs( vector<FemtoTrackProxy> &col1, vector<FemtoTrackProxy> &col2, string prefix ){
 		TLorentzVector lv1, lv2, lv;
 		for ( FemtoTrackProxy& _proxy1 : col1 ){
 			for ( FemtoTrackProxy& _proxy2 : col2 ){
+				if ( fabs( _proxy1._track->mPt - _proxy2._track->mPt ) < 0.001 && fabs( _proxy1._track->mEta - _proxy2._track->mEta ) < 0.001 && fabs( _proxy1._track->mPhi - _proxy2._track->mPhi ) < 0.001 )
+					continue;
 				lv1.SetPtEtaPhiM( _proxy1._track->mPt, _proxy1._track->mEta, _proxy1._track->mPhi, 0.105 );
 				lv2.SetPtEtaPhiM( _proxy2._track->mPt, _proxy2._track->mEta, _proxy2._track->mPhi, 0.105 );
 				lv = lv1 + lv2;
@@ -111,12 +132,15 @@ protected:
 
 		
 		if ( cMap.count( _event->mBin16 ) == 0 ) return;
+		
 		int mappedCen = cMap[ _event->mBin16 ];
-		if (mappedCen < 0) return;
+		
 		// LOG_F( INFO, "cMap[ %d ] = %d", _event->mBin16, mappedCen );
 		book->fill( "mBin16", _event->mBin16 );
 		book->fill( "mMappedCen", mappedCen );
 		
+		if ( mappedCen < 0 ) return;
+
 		size_t nTracks = _rTracks.N();
 		FemtoTrackProxy _proxy;
 
@@ -176,24 +200,35 @@ protected:
 				book->fill( "module_MLP", mlp, _proxy._mtdPid->module() );
 				book->fill( "backleg_MLP", mlp, _proxy._mtdPid->backleg() );
 
-				if (bdt > 0.15 ){
+				if ( _bdtFilter.pass( _proxy ) ){
 					if ( charge > 0 )
 						pos_mtd.push_back( _proxy );
 					else 
 						neg_mtd.push_back( _proxy );
 					nMTD++;
 				}
+				
 					
 
 			}
 		} // loop on tracks
 
 		book->fill( "nTof_vs_nMtd", nMTD, nTOF );
+		book->fill( "tof_pos_vs_neg", neg_tof.size(), pos_tof.size() );
+		book->fill( "mtd_pos_vs_neg", neg_mtd.size(), pos_mtd.size() );
 
-		makePairs( pos_tof, neg_mtd, "uls" );
-		makePairs( neg_tof, pos_mtd, "uls" );
-		makePairs( pos_tof, pos_mtd, "ls" );
-		makePairs( neg_tof, neg_mtd, "ls" );
+		// makePairs( pos_tof, neg_mtd, "uls" );
+		// makePairs( neg_tof, pos_mtd, "uls" );
+		// makePairs( pos_tof, pos_mtd, "ls" );
+		// makePairs( neg_tof, neg_mtd, "ls" );
+
+		makePairs( pos_tof, neg_tof, "tof_uls" );
+		makePairs( neg_tof, "tof_ls" );
+		makePairs( pos_tof, "tof_ls" );
+
+		makePairs( pos_mtd, neg_mtd, "mtd_uls" );
+		makePairs( neg_mtd, "mtd_ls" );
+		makePairs( pos_mtd, "mtd_ls" );
 
 
 	}
@@ -206,7 +241,6 @@ protected:
 			TNamed config_str( "config", config.toXml() );
 			config_str.Write();
 		}
-		
 	}
 	
 };

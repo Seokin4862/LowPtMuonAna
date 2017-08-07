@@ -2,6 +2,7 @@
 #define FILTER_MUON_BDT_H
 
 #include "XmlConfig.h"
+#include "XmlRange.h"
 #include "FemtoDstFormat/FemtoTrackProxy.h"
 
 #include "TMVA/Reader.h"
@@ -29,6 +30,8 @@ public:
 	Float_t MVA_Pt;
 	Float_t MVA_Charge;
 
+	XmlRange signal_range;
+
 	MuonBDTFilter() {}
 	MuonBDTFilter(XmlConfig &_cfg, string _nodePath) {
 		load( _cfg, _nodePath );
@@ -51,6 +54,8 @@ public:
 		MVA_Charge     = (Float_t)_proxy._track->charge();
 
 		return reader->EvaluateMVA( "BDT" );
+
+		
 	}
 
 	void load( XmlConfig &_cfg, string _nodePath ){
@@ -74,6 +79,8 @@ public:
 
 		reader->BookMVA( "BDT", weights_xml.c_str() ); 
 
+		signal_range.loadConfig( _cfg, _nodePath + ".Range" );
+
 	}
 
 	bool pass( FemtoTrackProxy &_proxy ){
@@ -82,7 +89,7 @@ public:
 
 		float lh = evaluate( _proxy );
 
-		if (lh < 0 )
+		if ( !signal_range.inInclusiveRange( lh ) )
 			return false;
 	
 		return true;

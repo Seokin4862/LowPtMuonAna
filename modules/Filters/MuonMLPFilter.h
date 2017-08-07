@@ -2,6 +2,7 @@
 #define FILTER_MUON_MLP_H
 
 #include "XmlConfig.h"
+#include "XmlRange.h"
 #include "FemtoDstFormat/FemtoTrackProxy.h"
 
 #include "TMVA/Reader.h"
@@ -28,6 +29,8 @@ public:
 	Float_t MVA_BL;
 	Float_t MVA_Pt;
 	Float_t MVA_Charge;
+
+	XmlRange signal_range;
 
 	MuonMLPFilter() {}
 	MuonMLPFilter(XmlConfig &_cfg, string _nodePath) {
@@ -74,6 +77,8 @@ public:
 
 		reader->BookMVA( "MLP", weights_xml.c_str() ); 
 
+		signal_range.loadConfig( _cfg, _nodePath + ".Range" );
+
 	}
 
 	bool pass( FemtoTrackProxy &_proxy ){
@@ -82,7 +87,7 @@ public:
 
 		float lh = evaluate( _proxy );
 
-		if (lh < 0 )
+		if ( !signal_range.inInclusiveRange( lh ) )
 			return false;
 	
 		return true;

@@ -7,7 +7,7 @@
 	<MPM>
 		<EventLoop progress="true" />
 		<input>
-			<dst treeName="FemtoDst" url="./mtd_list.lis" splitBy="25"/>
+			<dst treeName="FemtoDst" url="./flist.lis" splitBy="15"/>
 		</input>
 
 		<output>
@@ -41,14 +41,14 @@
 			5 :: 0,
 			6 :: 0,
 			7 :: 0,
-			8 :: -1,
-			9 :: -1,
-			10 :: -1,
-			11 :: -1,
-			12 :: -2,
-			13 :: -2,
-			14 :: -3,
-			15 :: -3
+			8 :: 0,
+			9 :: 0,
+			10 :: 0,
+			11 :: 0,
+			12 :: 0,
+			13 :: 0,
+			14 :: 0,
+			15 :: 0
 		</CentralityMap>
 
 		<histograms>
@@ -60,8 +60,22 @@
 			<Histo name="zb_p_signal" title="; p (GeV/c); 1/#beta " bins_x="bins.signal.mP" bins_y="bins.zb" />
 
 			<Histo name="nTof_vs_nMtd" title=";nMTD; nTOF" bins_x="bins.nMuons" bins_y="bins.nMuons" />
+			<Histo name="tof_pos_vs_neg" title=";neg; pos" bins_x="bins.nMuons" bins_y="bins.nMuons" />
+			<Histo name="mtd_pos_vs_neg" title=";neg; pos" bins_x="bins.nMuons" bins_y="bins.nMuons" />
+			
+
 			<Histo name="uls_pt_mass" title=";M_{#mu#mu} (GeV/c^{2}); p_{T} (GeV/c)" bins_x="bins.mass" bins_y="bins.mass" />
 			<Histo name="ls_pt_mass" title=";M_{#mu#mu} (GeV/c^{2}); p_{T} (GeV/c)" bins_x="bins.mass" bins_y="bins.mass" />
+			<Histo name="lsp_pt_mass" title=";M_{#mu#mu} (GeV/c^{2}); p_{T} (GeV/c)" bins_x="bins.mass" bins_y="bins.mass" />
+			<Histo name="lsn_pt_mass" title=";M_{#mu#mu} (GeV/c^{2}); p_{T} (GeV/c)" bins_x="bins.mass" bins_y="bins.mass" />
+
+			<Histo name="tof_uls_pt_mass" title=";M_{#mu#mu} (GeV/c^{2}); p_{T} (GeV/c)" bins_x="bins.mass" bins_y="bins.mass" />
+			<Histo name="tof_ls_pt_mass" title=";M_{#mu#mu} (GeV/c^{2}); p_{T} (GeV/c)" bins_x="bins.mass" bins_y="bins.mass" />
+			<Histo name="tof_lsp_pt_mass" title=";M_{#mu#mu} (GeV/c^{2}); p_{T} (GeV/c)" bins_x="bins.mass" bins_y="bins.mass" />
+			<Histo name="tof_lsn_pt_mass" title=";M_{#mu#mu} (GeV/c^{2}); p_{T} (GeV/c)" bins_x="bins.mass" bins_y="bins.mass" />
+
+			<Histo name="mtd_uls_pt_mass" title=";M_{#mu#mu} (GeV/c^{2}); p_{T} (GeV/c)" bins_x="bins.mass" bins_y="bins.mass" />
+			<Histo name="mtd_ls_pt_mass" title=";M_{#mu#mu} (GeV/c^{2}); p_{T} (GeV/c)" bins_x="bins.mass" bins_y="bins.mass" />
 
 			<!-- MVA -->
 			<Histo name="BDT" title="BDT; likelihood;" bins_x="bins.likelihood" />
@@ -92,14 +106,15 @@
 
 
 		<LowPtTrackFilter>
-			<Range name="pT" min="0" max="0.4" />
+			<Range name="pT" min="0.175" max="0.4" />
+			<Range name="p" min="0.175" max="0.35" />
 			<Range name="eta" min="-1.0" max="1.0" />
-			<Range name="nSigmaPion" min="-30.5" max="0.0" />
+			<Range name="nSigmaPion" min="-5" max="0.0" />
 			
-			<Range name="nHitsFit" min="25.0" max="50" />
+			<Range name="nHitsFit" min="15.0" max="50" />
 			<Range name="nHitsRatio" min="0.52" max="50" />
 			<Range name="nHitsDedx" min="15.0" max="50"/>
-			<Range name="dca" min="0" max="1.0" />
+			<Range name="dca" min="0" max="3.0" />
 		</LowPtTrackFilter>
 
 		<MtdTrackFilter>
@@ -115,8 +130,8 @@
 
 		 <LowPtMuonFilter url="out/fits.root">
 			<ZbRC sigma="0.014"/>
-			<Range name="nSigmaMu" min="-3" max="3" />
-			<Range name="nSigmaPi" min="-10" max="10" />
+			<Range name="nSigmaMu" min="-1.5" max="1.5" />
+			<Range name="nSigmaPi" min="-5" max="5" />
 			<MomentumBins>bins.signal.mP</MomentumBins>
 			
 			<Histogram url="./out/fits.root" name="mu_lambda_vs_p" />
@@ -126,9 +141,11 @@
 		</LowPtMuonFilter> 
 		<MuonBDTFilter>
 			<weights>./config/TMVAClassification_BDT.weights.xml</weights>
+			<Range name="signal" min="-10.2" max="1.5"/>
 		</MuonBDTFilter>
 		<MuonMLPFilter>
 			<weights>./config/TMVAClassification_MLP.weights.xml</weights>
+			<Range name="signal" min="-0.1" max="1.5"/>
 		</MuonMLPFilter>
 	</MPM>
 
@@ -136,9 +153,9 @@
 		<events type="l">All, Trigger, VPD</n>
 		<mBin16 width="1" min="0" max="16" />
 		<mBin16L type="l"> 75-80,70-75,65-70,60-65,55-60,50-55,45-50,40-45,35-40,30-35,25-30,20-25,15-20,10-15,5-10,0-5 </mBin16L> 
-		<mMappedCen type="l"> 40-80, , , , , , , ,  </mMappedCen>
+		<mMappedCen type="l"> 0-80, , , , , , , ,  </mMappedCen>
 
-		<mass width="0.010" min="0" max="2.5" />
+		<mass width="0.010" min="0" max="3.5" />
 
 		<zb width="0.0025" min="-0.5" max="0.5" />
 		<likelihood width="0.01" min="-1" max="1" />
@@ -150,7 +167,7 @@
 		<MVA_dTOF width="0.1" min="-5" max="5" />
 		<MVA_nSigmaPi width="0.05" min="-5" max="5" />
 		<MVA_nHitsFit width="1" min="0" max="50" />
-		<MVA_DCA width="0.05" min="0" max="5.0" />
+		<MVA_DCA width="0.001" min="0" max="3.0" />
 		<MVA_Cell width="1" min="0" max="13" />
 		<MVA_Module width="1" min="0" max="10" />
 		<MVA_Backleg width="1" min="0" max="31" />
