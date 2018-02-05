@@ -53,6 +53,10 @@ public:
 		MVA_Pt         = _proxy._track->mPt;
 		MVA_Charge     = (Float_t)_proxy._track->charge();
 
+		// HACK
+		if (MVA_Pt > 2.0)
+			MVA_Pt = 2.0;
+
 		return reader->EvaluateMVA( "MLP" );
 	}
 
